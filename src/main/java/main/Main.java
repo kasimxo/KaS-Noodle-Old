@@ -26,7 +26,7 @@ public class Main {
 		
 		File f = new File(NoodleConfig.CVsPath);
 		
-		File ff = f.listFiles()[0];
+		File ff = f.listFiles()[1];
 		
 		File output = new File("./cvs/output.txt");
 
@@ -89,12 +89,16 @@ public class Main {
 	            		//
 	            	}
 	            	
+	            	if(linea.toLowerCase().contains("módulo profesional") && linea.toLowerCase().contains(":")) {
+	            		System.out.print(linea.substring(linea.indexOf(":")+1));
+	            	}
 	            	
+	            	/*
 	            	if(linea.length()>2 && (linea.charAt(linea.length()-1)=='\n' || linea.charAt(linea.length()-1)=='\r')) {
 	            		linea.substring(0, linea.length()-1);
 	            		linea = linea.replaceAll("\\s+$", "");
 	            		
-	            		if(linea.charAt(linea.length()-1)=='.' || linea.charAt(linea.length()-1)==':') {
+	            		if(linea.length()>1 && (linea.charAt(linea.length()-1)=='.' || linea.charAt(linea.length()-1)==':')) {
 	            			linea += '\n';
 	            		}
 	            		System.out.print(linea);
@@ -102,12 +106,8 @@ public class Main {
 	            		System.out.print(linea);
 	            	}
 	            	
-	            	
-	            	
-	            	
-	            	
-	            	
-	            	
+	            	*/
+
 	            	/*
 	            	if(linea.length()>=2 && (linea.charAt(linea.length()-1)=='\n' || linea.charAt(linea.length()-1)=='\r') && (linea.charAt(linea.length()-2)=='.' || linea.charAt(linea.length()-2)==':')) {
 
@@ -121,12 +121,9 @@ public class Main {
 	            	
 	            	//System.out.println("*");
 	            }
-	            
-	            
-	            
-	            
+
 	            //System.out.println(pageText);
-	            System.out.println("------++++++------");
+	            //System.out.println("\n------++++++------");
 			}
 			
 			irrelevante.forEach((K,V) -> {
@@ -147,8 +144,7 @@ public class Main {
 	            
 	            String[] lineas = pageText.split("\n"); 
 	            for(String linea : lineas) {
-	            	
-	            	
+
 	            	System.out.println(linea);
 	            	System.out.println("*");
 	            }
