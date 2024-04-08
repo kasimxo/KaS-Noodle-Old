@@ -89,24 +89,29 @@ public class Main {
 	            		//
 	            	}
 	            	
-	            	if(linea.toLowerCase().contains("módulo profesional") && linea.toLowerCase().contains(":")) {
-	            		System.out.print(linea.substring(linea.indexOf(":")+1));
-	            	}
-	            	
-	            	/*
+	            	//Procesa una lína para asegurarse de que termina correctamente
 	            	if(linea.length()>2 && (linea.charAt(linea.length()-1)=='\n' || linea.charAt(linea.length()-1)=='\r')) {
 	            		linea.substring(0, linea.length()-1);
 	            		linea = linea.replaceAll("\\s+$", "");
 	            		
 	            		if(linea.length()>1 && (linea.charAt(linea.length()-1)=='.' || linea.charAt(linea.length()-1)==':')) {
-	            			linea += '\n';
+	            			//linea += '\n';
 	            		}
-	            		System.out.print(linea);
+	            		//System.out.print(linea);
 	            	} else {
-	            		System.out.print(linea);
+	            		//System.out.print(linea);
 	            	}
 	            	
-	            	*/
+	            	//Identifica módulos profesionales
+	            	if((linea.toLowerCase().contains("módulo profesional") || linea.toLowerCase().contains("modulo profesional"))&& linea.toLowerCase().contains(":")) {
+	            		//System.out.println(linea);
+	            		System.out.println(linea.substring(linea.indexOf(":")+1));
+	            	}
+	            	
+	            	
+	            	
+	            	
+	            	
 
 	            	/*
 	            	if(linea.length()>=2 && (linea.charAt(linea.length()-1)=='\n' || linea.charAt(linea.length()-1)=='\r') && (linea.charAt(linea.length()-2)=='.' || linea.charAt(linea.length()-2)==':')) {
