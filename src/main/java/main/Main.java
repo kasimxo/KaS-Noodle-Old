@@ -14,19 +14,23 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.text.PDFTextStripper;
 
+import model.Modulo;
 import noodleconfig.NoodleConfig;
 
 public class Main {
+	
+	public static List<Modulo> modulos;
 
 	public static void main(String[] args) {
 		
+		modulos = new ArrayList<Modulo>();
 		
 		System.out.println("Hola");
 		System.out.println(NoodleConfig.CVsPath);
 		
 		File f = new File(NoodleConfig.CVsPath);
 		
-		File ff = f.listFiles()[1];
+		File ff = f.listFiles()[4];
 		
 		File output = new File("./cvs/output.txt");
 
@@ -67,7 +71,15 @@ public class Main {
 			//List<String>  = new ArrayList<String>();
 			HashMap<String, Integer> irrelevante = new HashMap();
 			
+
+			Boolean modulo = false;
+			Boolean resultadoAprendizaje = false;
+			Boolean criterioEvaluacion = false;
+			
+			
 			for(int i = 0; i<paginas; i++) {
+				
+				
 				//Identificar header/footeer/coincidencias
 				PDFTextStripper reader = new PDFTextStripper();
 	            reader.setStartPage(i);
@@ -75,7 +87,12 @@ public class Main {
 	            String pageText = reader.getText(document);
 	            
 	            String[] lineas = pageText.split("\n"); 
+	            
+	            String frase = "";
+	            
 	            for(String linea : lineas) {
+	            	
+	            	/*
 	            	if(irrelevante.containsKey(linea)) {
 	            		int cont = irrelevante.get(linea);
 	            		//System.out.println("Actual: "+cont);
@@ -88,6 +105,7 @@ public class Main {
 	            		irrelevante.put(linea, 0);
 	            		//
 	            	}
+	            	*/
 	            	
 	            	//Procesa una lína para asegurarse de que termina correctamente
 	            	if(linea.length()>2 && (linea.charAt(linea.length()-1)=='\n' || linea.charAt(linea.length()-1)=='\r')) {
@@ -95,17 +113,48 @@ public class Main {
 	            		linea = linea.replaceAll("\\s+$", "");
 	            		
 	            		if(linea.length()>1 && (linea.charAt(linea.length()-1)=='.' || linea.charAt(linea.length()-1)==':')) {
-	            			//linea += '\n';
+	            			System.out.println(frase);
+	            			frase = "";
+	            			//Esto no tiene mucho sentido porque una línea puede terminar en un punto por casualidad
+	            			
+	            			
 	            		}
 	            		//System.out.print(linea);
-	            	} else {
-	            		//System.out.print(linea);
+	            	} else if(linea.startsWith("\n")||linea.startsWith("\r")){
+	            		System.out.println(frase);
+	            		frase = "";
 	            	}
+	            	frase += linea;
 	            	
 	            	//Identifica módulos profesionales
-	            	if((linea.toLowerCase().contains("módulo profesional") || linea.toLowerCase().contains("modulo profesional"))&& linea.toLowerCase().contains(":")) {
+	            	if( (linea.trim().toLowerCase().startsWith("módulo profesional") || linea.trim().toLowerCase().startsWith("modulo profesional")) && linea.toLowerCase().contains(":") ) {
+	            	
 	            		//System.out.println(linea);
-	            		System.out.println(linea.substring(linea.indexOf(":")+1));
+	            		String mod = linea.substring(linea.indexOf(":")+1);
+	            		//System.out.println(mod);
+	            		modulos.add(new Modulo(mod));
+	            		modulo = true;
+	            		
+	            	}
+	            	
+	            	if(modulo) {
+	            		//System.out.print(linea);
+	            		
+	            		if(linea.trim().toLowerCase().startsWith("resultados de aprendizaje y criterios de evaluaci")){
+	            			resultadoAprendizaje = true;
+	            		}
+	            		if(resultadoAprendizaje) {
+	            			System.out.print(linea);
+	            		}
+	            	}
+	            	
+	            	
+	            	
+	            	if(linea.trim().toLowerCase().startsWith("contenidos")  ) {
+	            		modulo = false;
+	            		resultadoAprendizaje = false;
+	            		criterioEvaluacion = false;
+	            		System.out.println("------");
 	            	}
 	            	
 	            	
@@ -140,6 +189,10 @@ public class Main {
 			System.out.println(ff.getName());
 			
 			System.out.println(irrelevante.size()); //Número de líneas en el documento
+			
+			for(Modulo mod : modulos) {
+				System.out.print(mod);
+			}
 			/*
 			for(int i = 0; i<paginas; i++) {
 				PDFTextStripper reader = new PDFTextStripper();
