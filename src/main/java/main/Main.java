@@ -15,22 +15,30 @@ import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.text.PDFTextStripper;
 
 import model.Modulo;
+import model.ResultadoAprendizaje;
 import noodleconfig.NoodleConfig;
 
 public class Main {
 	
-	public static List<Modulo> modulos;
+	//public static List<Modulo> modulos;
+	public static HashMap<String, Modulo> modulos;
+	public static String modu;
+	public static String ultimora;
 
 	public static void main(String[] args) {
 		
-		modulos = new ArrayList<Modulo>();
+		//modulos = new ArrayList<Modulo>();
+		modulos = new HashMap<String, Modulo>();
+		modu = "";
+		ultimora = "";
+		
 		
 		System.out.println("Hola");
 		System.out.println(NoodleConfig.CVsPath);
 		
 		File f = new File(NoodleConfig.CVsPath);
 		
-		File ff = f.listFiles()[4];
+		File ff = f.listFiles()[0];
 		
 		File output = new File("./cvs/output.txt");
 
@@ -52,19 +60,7 @@ public class Main {
 			
 			PDDocument document = Loader.loadPDF(ff);
 			
-			/*
 			
-			PDPageTree paginas = document.getPages();
-			
-			Iterator<PDPage> it = paginas.iterator();
-			
-			while(it.hasNext()) {
-				PDPage page = (PDPage) it.next();
-				
-				String text = pdfStripper.getText(page);
-			}
-			
-			*/
 			
 			int paginas = document.getNumberOfPages();
 			
@@ -74,7 +70,7 @@ public class Main {
 
 			Boolean modulo = false;
 			Boolean resultadoAprendizaje = false;
-			Boolean criterioEvaluacion = false;
+			Boolean criteriosEvaluacion = false;
 			
 			
 			for(int i = 0; i<paginas; i++) {
@@ -86,29 +82,14 @@ public class Main {
 	            reader.setEndPage(i);
 	            String pageText = reader.getText(document);
 	            
-	            String[] lineas = pageText.split("\n"); 
+	            String[] lineas = pageText.split("\n"); //Aquí ya estamos quitando todos los saltos de línea, por lo que no es necesario verlos
 	            
 	            String frase = "";
 	            
 	            for(String linea : lineas) {
 	            	
-	            	/*
-	            	if(irrelevante.containsKey(linea)) {
-	            		int cont = irrelevante.get(linea);
-	            		//System.out.println("Actual: "+cont);
-	            		cont++;
-	            		irrelevante.put(linea, cont);
-	            		//System.out.println("Updated: "+cont);
-	            		//System.out.println("Se ha encontrado una coincidencia");
-	            		
-	            	} else {
-	            		irrelevante.put(linea, 0);
-	            		//
-	            	}
-	            	*/
-	            	
 	            	//Procesa una lína para asegurarse de que termina correctamente
-	            	if(linea.length()>2 && (linea.charAt(linea.length()-1)=='\n' || linea.charAt(linea.length()-1)=='\r')) {
+	            	if(linea.length()>2 && linea.charAt(linea.length()-1)=='\r') {
 	            		linea.substring(0, linea.length()-1);
 	            		linea = linea.replaceAll("\\s+$", "");
 	            		
@@ -116,11 +97,10 @@ public class Main {
 	            			System.out.println(frase);
 	            			frase = "";
 	            			//Esto no tiene mucho sentido porque una línea puede terminar en un punto por casualidad
-	            			
-	            			
+
 	            		}
 	            		//System.out.print(linea);
-	            	} else if(linea.startsWith("\n")||linea.startsWith("\r")){
+	            	} else if(linea.compareTo("")==0){
 	            		System.out.println(frase);
 	            		frase = "";
 	            	}
@@ -132,52 +112,58 @@ public class Main {
 	            		//System.out.println(linea);
 	            		String mod = linea.substring(linea.indexOf(":")+1);
 	            		//System.out.println(mod);
-	            		modulos.add(new Modulo(mod));
+	            		
+	            		//Comprueba si están en el mapa y si no es así los mete
+	            		if(!modulos.containsKey(mod)) {
+	            			modulos.put(mod, new Modulo(mod));
+	            			modu = mod;
+	            		}
+	            			//modulos.add(new Modulo(mod));
 	            		modulo = true;
 	            		
 	            	}
 	            	
 	            	if(modulo) {
 	            		//System.out.print(linea);
-	            		
+	            		//System.out.println("PENE");
+        				//System.exit(0);
 	            		if(linea.trim().toLowerCase().startsWith("resultados de aprendizaje y criterios de evaluaci")){
 	            			resultadoAprendizaje = true;
 	            		}
 	            		if(resultadoAprendizaje) {
-	            			System.out.print(linea);
+	            			//Aquí vamos a procesar la línea porque estamos dentro de los resultados de aprendizaje
+	            			
+	            			if(linea.matches("^[1-9]\\.\\s.*")) {
+	            				//Aquí hacemos match de RA
+	            				
+	            				modulos.get(modu).addResultadoAprendizaje(linea);
+	            				ultimora = linea;
+	            				//System.out.println("PENE");
+	            				System.out.println(linea);
+	            				frase ="";
+	            			}
+	            			if(linea.trim().toLowerCase().startsWith("criterios de evaluaci")) {
+	            				criteriosEvaluacion = true;
+	            			}
+	            			if(linea.trim().toLowerCase().matches("^[a-z]\\).*")){
+	            				
+	            				modulos.get(modu).addCriterioEvaluacion(ultimora, linea);
+	            				System.out.println(frase);
+	            				System.out.println(linea);
+	            				//System.exit(0);
+	            			}
 	            		}
 	            	}
-	            	
-	            	
-	            	
+
 	            	if(linea.trim().toLowerCase().startsWith("contenidos")  ) {
 	            		modulo = false;
 	            		resultadoAprendizaje = false;
-	            		criterioEvaluacion = false;
+	            		criteriosEvaluacion = false;
+	            		ultimora = "";
+	            		modu = "";
 	            		System.out.println("------");
 	            	}
-	            	
-	            	
-	            	
-	            	
-	            	
-
-	            	/*
-	            	if(linea.length()>=2 && (linea.charAt(linea.length()-1)=='\n' || linea.charAt(linea.length()-1)=='\r') && (linea.charAt(linea.length()-2)=='.' || linea.charAt(linea.length()-2)==':')) {
-
-	            		System.out.print(linea);
-	            	} else if(linea.length()>=2) {
-	            		System.out.print(linea.substring(0, linea.length()-1));
-	            	} else {
-	            		//System.out.print(linea);
-	            	}
-	            	*/
-	            	
-	            	//System.out.println("*");
 	            }
-
-	            //System.out.println(pageText);
-	            //System.out.println("\n------++++++------");
 			}
 			
 			irrelevante.forEach((K,V) -> {
@@ -190,27 +176,10 @@ public class Main {
 			
 			System.out.println(irrelevante.size()); //Número de líneas en el documento
 			
-			for(Modulo mod : modulos) {
-				System.out.print(mod);
-			}
-			/*
-			for(int i = 0; i<paginas; i++) {
-				PDFTextStripper reader = new PDFTextStripper();
-	            reader.setStartPage(i);
-	            reader.setEndPage(i);
-	            String pageText = reader.getText(document);
-	            
-	            String[] lineas = pageText.split("\n"); 
-	            for(String linea : lineas) {
-
-	            	System.out.println(linea);
-	            	System.out.println("*");
-	            }
-	            
-	            //System.out.println(pageText);
-	            System.out.println("------++++++------");
-			}
-			 */
+			modulos.forEach((K,V) -> {
+				System.out.println(V);
+			});
+			
 			
 			document.close();
 			
